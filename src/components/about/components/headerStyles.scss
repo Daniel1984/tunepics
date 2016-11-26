@@ -1,0 +1,32 @@
+.about_header {
+  box-sizing: border-box;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  width: 100%;
+  padding: 15px;
+  background-color: #000;
+  justify-content: space-between;
+  align-items: flex-end;
+
+  > li {
+    display: inline-block;
+    vertical-align: top;
+  }
+}
+
+.about_header-link {
+  font-size: 20px;
+  color: #fff;
+  text-decoration: none;
+  transition: color .2s ease-in-out;
+
+  &:hover:not(.about_header-link--logo) {
+    color: deeppink;
+  }
+}
+
+.about_header-link--logo {
+  font-weight: 600;
+}
