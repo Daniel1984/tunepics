@@ -1,5 +1,6 @@
 var webpack = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var autoprefixer = require('autoprefixer');
 
 module.exports = {
   devtool: 'eval-source-map',
@@ -13,13 +14,13 @@ module.exports = {
   module: {
     loaders: [
       { test: /\.js$/, exclude: /node_modules/, loader: 'babel' },
-      { test: /\.scss$/, loaders: ["style-loader", "css-loader", "sass-loader"] },
+      { test: /\.scss$/, exclude: /node_modules/, loaders: ["style-loader", "css-loader", "sass-loader?config=sassConfig"] },
       { test: /\.(jpg|png)$/, loader: 'file?name=[path][name].[hash].[ext]' }
     ]
   },
 
-  sass: [
-    require('autoprefixer')
+  sassConfig: [
+    autoprefixer({ add: true, browsers: [] })
   ],
 
   plugins: [

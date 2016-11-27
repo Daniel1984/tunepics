@@ -1,12 +1,16 @@
 import React, { PropTypes } from 'react';
-// import Tolls from '../tools/component';
+import TollsList from '../toolsList/toolsListComponent';
+import Canvas from '../canvas/canvasComponent';
+import Properties from '../properties/propertiesComponent';
 
-class PictunesApp extends React.Component {
-  render() {
-    return (
-      <h1>editor here</h1>
-    );
-  }
+function Editor(props) {
+  return (
+    <div className="editor">
+      <TollsList />
+      <Canvas />
+      <Properties />
+    </div>
+  );
 }
 
-export default PictunesApp;
+export default Editor;
