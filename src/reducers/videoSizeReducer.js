@@ -1,7 +1,7 @@
 export default function toolReducer(state = {}, action) {
   switch (action.type) {
-    case 'DONE_LOADING_VIDEO':
-      return action.videoData;
+    case 'SET_VIDEO_SIZE':
+      return Object.assign({}, action.videoSize)
       break;
 
     default:

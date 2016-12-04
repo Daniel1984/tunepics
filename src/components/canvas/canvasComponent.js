@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import * as videoDataActions from '../../actions/videoDataActions';
+import * as setVideoSize from '../../actions/videoSizeActions';
 import Loader from '../common/loader/loaderComponent';
 import TimeLine from '../timeline/timelineComponent';
 import FileInputField from '../fileInputField/fileInputFieldComponent';
@@ -54,6 +55,7 @@ class Canvas extends Component {
 
   setCanvasSize() {
     const { width, height } = this.getCanvasDimensions();
+    this.props.dispatch(setVideoSize.setVideoSize({ width, height }));
     this.canvasElement.width = width;
     this.canvasElement.height = height;
   }
@@ -69,7 +71,7 @@ class Canvas extends Component {
     let drawToCanvas = () => {
       ctx.drawImage(this.props.videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
       ctx.font = '48px serif';
-      ctx.fillText('Test', 10, 50);
+      ctx.fillText('Mr.Retardo', this.canvasElement.width / 2, this.canvasElement.height / 2);
     }
 
     let play = () => {
@@ -92,8 +94,8 @@ class Canvas extends Component {
   }
 
   renderVideoFrame(frame = 0) {
-    this.props.videoData.play();
     this.props.videoData.currentTime = frame;
+    this.props.videoData.play();
 
     let drawImageFromVideoToCanvas = () => {
       this.props.videoData.removeEventListener('timeupdate', drawImageFromVideoToCanvas);

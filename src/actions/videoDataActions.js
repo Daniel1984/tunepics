@@ -1,3 +1,3 @@
 export function doneConvertingVideo(videoData) {
-  return { type: 'DONE_CONVERTING_VIDEO', videoData };
+  return { type: 'DONE_LOADING_VIDEO', videoData };
 }
