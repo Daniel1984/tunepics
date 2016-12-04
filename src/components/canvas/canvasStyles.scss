@@ -1,10 +1,17 @@
 .canvas {
   position: fixed;
-  left: 80px;
-  right: 300px;
+  left: 100px;
+  right: 0;
   top: 0;
   bottom: 0;
   background-color: rgb(30, 30, 30);
-
   color: #fff;
+}
+
+.canvas_renderer {
+  border: 1px solid ghostwhite;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }

@@ -1,0 +1,86 @@
+.timeline {
+  position: fixed;
+  box-sizing: border-box;
+  height: 40px;
+  bottom: 0;
+  left: 100px;
+  right: 0;
+  background-color: rgb(51, 51, 51);
+  transform: translate3d(0, 0, 0);
+}
+
+.timeline_button {
+  position: relative;
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  background-color: orangered;
+  border-right: 1px solid #000;
+  color: #000;
+  cursor: pointer;
+
+  &:after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.timeline_button--play:after {
+  content: '';
+  display: block;
+  border-top: 14px solid transparent;
+  border-left: 22px solid #000;
+  border-bottom: 14px solid transparent;
+}
+
+.timeline_button--pause:after {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 20px;
+  border-right: 6px solid #000;
+  border-left: 6px solid #000;
+}
+
+.timeline_track {
+  position: absolute;
+  top: 0;
+  left: 40px;
+  right: 0;
+  height: 40px;
+}
+
+.timeline_trim-handle {
+  position: absolute;
+  width: 10px;
+  height: 100%;
+  background-color: orangered;
+  color: #000;
+  cursor: ew-resize;
+
+  &:after {
+    content: '\2807';
+    font-size: 20px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+.timeline_trim-handle--left {
+  left: 0;
+}
+
+.timeline_trim-handle--right {
+  right: 0;
+}
+
+.timeline_play-track {
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.3);
+  position: absolute;
+  left: 10px;
+  height: 100%;
+}
