@@ -12,10 +12,6 @@ let trackElement;
 let playFrom = 0;
 
 function Timeline(props) {
-  function toggleVideo() {
-    props.shouldPlay ? props.play(playFrom) : props.pause();
-  }
-
   function savetrackContainerRef(el) {
     trackContainerElement = el;
   }
@@ -28,23 +24,16 @@ function Timeline(props) {
     return trackContainerElement.clientWidth - TRIM_HANDLE_WIDTH * 2;
   }
 
-  function updateTrackWidth() {
-    if (!trackContainerElement) return;
-
-    const width = `${Math.ceil(getTotalTrackWidth() * props.playTrackWidthInPercent / 100)}px`;
-    return { width };
-  }
-
   function getExactFrameToStopAt(e) {
     const clickXPos = Math.min(e.clientX - TRACK_X_POS, getTotalTrackWidth());
     const percentageXDistance = clickXPos * 100 / getTotalTrackWidth();
     const totalFrames = props.videoData.length;
-    return Math.floor(totalFrames * percentageXDistance / 100);
+    return Math.floor(props.videoData.duration * percentageXDistance / 100);
   }
 
   function stopAtSelectedFrameFrame(e) {
     playFrom = getExactFrameToStopAt(e);
-    props.stopAtFrame(playFrom);
+    props.renderFrame(playFrom);
   }
 
   function playFromSelectedFrame(e) {
@@ -53,7 +42,7 @@ function Timeline(props) {
   }
 
   function playViedeoFromFrame(e) {
-    // props.shouldPlay ? stopAtSelectedFrameFrame(e) : playFromSelectedFrame(e);
+    props.paused ? stopAtSelectedFrameFrame(e) : playFromSelectedFrame(e);
   }
 
   props.videoData.addEventListener('timeupdate', function() {
@@ -61,10 +50,18 @@ function Timeline(props) {
     trackElement.style.width = `${Math.ceil(getTotalTrackWidth() * props.videoData.currentTime / props.videoData.duration)}px`;;
   });
 
+  function playVideo() {
+    props.play(props.videoData.currentTime);
+  }
+
+  function pauseVideo() {
+    props.pause();
+  }
+
   return (
     <div className="timeline">
-      {props.paused && <div className="timeline_button timeline_button--play" onClick={props.play}></div>}
-      {!props.paused && <div className="timeline_button timeline_button--pause" onClick={props.pause}></div>}
+      {props.paused && <div className="timeline_button timeline_button--play" onClick={playVideo}></div>}
+      {!props.paused && <div className="timeline_button timeline_button--pause" onClick={pauseVideo}></div>}
 
       <div ref={savetrackContainerRef} onClick={playViedeoFromFrame} className="timeline_track">
         <div className="timeline_trim-handle timeline_trim-handle--left"></div>
@@ -77,7 +74,6 @@ function Timeline(props) {
 
 function mapStateToProps(state, ownProps) {
   return {
-    tool: state.tool,
     videoData: state.videoData
   }
 }

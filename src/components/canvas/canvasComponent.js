@@ -58,34 +58,31 @@ class Canvas extends Component {
     this.canvasElement.height = height;
   }
 
-  playVideo() {
+  playVideo(frame = 0) {
+    this.props.videoData.currentTime = frame;
     this.setState({ paused: false });
     this.props.videoData.play();
 
     const ctx = this.getCanvasContext();
-
     cancelAnimationFrame(this.canvasRAFid);
 
-    this.props.videoData.addEventListener('play', () => {
-      // this.props.videoData.currentTime = frame;
-      let drawToCanvas = () => {
-        ctx.drawImage(this.props.videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
-        ctx.font = '48px serif';
-        ctx.fillText('Test', 10, 50);
+    let drawToCanvas = () => {
+      ctx.drawImage(this.props.videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
+      ctx.font = '48px serif';
+      ctx.fillText('Test', 10, 50);
+    }
+
+    let play = () => {
+      drawToCanvas();
+      this.canvasRAFid = requestAnimationFrame(play);
+
+      if (this.props.videoData.ended) {
+        cancelAnimationFrame(this.canvasRAFid);
+        this.setState({ paused: true });
       }
+    }
 
-      let play = () => {
-        drawToCanvas();
-        this.canvasRAFid = requestAnimationFrame(play);
-
-        if (this.props.videoData.ended) {
-          cancelAnimationFrame(this.canvasRAFid);
-          this.setState({ paused: true });
-        }
-      }
-
-      play();
-    });
+    play();
   }
 
   pauseVideo() {
@@ -127,7 +124,7 @@ class Canvas extends Component {
         {this.state.videoProcessing && <Loader message="Processing video. Please wait..." />}
         {this.state.canvasVisible && <canvas ref={el => this.canvasElement = el} className="canvas_renderer"></canvas>}
         {this.state.filePickerVisible && <FileInputField onFileSelected={this.setupStage} message="Choose a video to start..."/>}
-        {this.state.canvasVisible && <TimeLine play={this.playVideo} pause={this.pauseVideo} paused={this.state.paused} />}
+        {this.state.canvasVisible && <TimeLine renderFrame={this.renderVideoFrame} play={this.playVideo} pause={this.pauseVideo} paused={this.state.paused} />}
       </section>
     );
   }
