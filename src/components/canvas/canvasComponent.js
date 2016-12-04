@@ -58,7 +58,7 @@ class Canvas extends Component {
     this.canvasElement.height = height;
   }
 
-  playVideo() {
+  playVideo(playFrom = 0) {
     this.props.videoData.play();
     let RAFid;
     const ctx = this.getCanvasContext();
@@ -77,16 +77,27 @@ class Canvas extends Component {
     RAFid = requestAnimationFrame(play);
   }
 
+  renderVideoFrame(frame = 0) {
+    this.props.videoData.play();
+    this.props.videoData.currentTime = frame;
+
+    this.props.videoData.addEventListener('timeupdate', () => {
+      this.props.videoData.pause();
+      const ctx = this.getCanvasContext();
+      ctx.drawImage(this.props.videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
+    });
+  }
+
   recordVideo(e) {
     const file = e.target.files[0];
     const videoElement = document.createElement('video');
-    // videoElement.muted = true;
+    videoElement.muted = true;
     videoElement.src = URL.createObjectURL(file);
     videoElement.addEventListener('loadedmetadata', () => {
       this.props.dispatch(videoDataActions.doneConvertingVideo(videoElement));
       this.setState({ canvasVisible: true, filePickerVisible: false });
       this.setCanvasSize();
-      this.playVideo();
+      this.renderVideoFrame(0);
     });
   }
 
