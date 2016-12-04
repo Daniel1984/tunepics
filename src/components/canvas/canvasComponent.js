@@ -12,18 +12,18 @@ const PORTRAIT_MAX_HEIGHT = 480;
 class Canvas extends Component {
   constructor(props) {
     super(props);
-    this.recordVideo = this.recordVideo.bind(this);
-    this.playSequence = this.playSequence.bind(this);
-    this.stopAtFrame = this.stopAtFrame.bind(this);
-    this.pauseVideo = this.pauseVideo.bind(this);
+    this.setupStage = this.setupStage.bind(this);
+    this.playVideo = this.playVideo.bind(this);
+    this.renderVideoFrame = this.renderVideoFrame.bind(this);
     this.setCanvasSize = this.setCanvasSize.bind(this);
+    this.pauseVideo = this.pauseVideo.bind(this);
+
+    this.canvasRAFid;
 
     this.state = {
       canvasVisible: false,
-      videoProcessing: false,
       filePickerVisible: true,
-      shouldPlay: true,
-      playTrackWidth: 0
+      paused: true
     }
   }
 
@@ -58,37 +58,57 @@ class Canvas extends Component {
     this.canvasElement.height = height;
   }
 
-  playVideo(playFrom = 0) {
+  playVideo(frame = 10) {
+    this.setState({ paused: false });
     this.props.videoData.play();
-    let RAFid;
+
     const ctx = this.getCanvasContext();
 
-    let drawToCanvas = () => {
-      ctx.drawImage(this.props.videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
-      ctx.font = '48px serif';
-      ctx.fillText('Test', 10, 50);
-    }
+    cancelAnimationFrame(this.canvasRAFid);
 
-    function play() {
-      drawToCanvas();
-      RAFid = requestAnimationFrame(play);
-    }
+    this.props.videoData.addEventListener('play', () => {
+      this.props.videoData.currentTime = 5;
+      let drawToCanvas = () => {
+        ctx.drawImage(this.props.videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
+        ctx.font = '48px serif';
+        ctx.fillText('Test', 10, 50);
+      }
 
-    RAFid = requestAnimationFrame(play);
+      let play = () => {
+        drawToCanvas();
+        this.canvasRAFid = requestAnimationFrame(play);
+
+        if (this.props.videoData.ended) {
+          cancelAnimationFrame(this.canvasRAFid);
+          this.setState({ paused: true });
+        }
+      }
+
+      play();
+    });
+  }
+
+  pauseVideo() {
+    this.setState({ paused: true });
+    this.props.videoData.pause();
+    cancelAnimationFrame(this.canvasRAFid);
   }
 
   renderVideoFrame(frame = 0) {
     this.props.videoData.play();
     this.props.videoData.currentTime = frame;
 
-    this.props.videoData.addEventListener('timeupdate', () => {
+    let drawImageFromVideoToCanvas = () => {
+      this.props.videoData.removeEventListener('timeupdate', drawImageFromVideoToCanvas);
       this.props.videoData.pause();
       const ctx = this.getCanvasContext();
       ctx.drawImage(this.props.videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
-    });
+    }
+
+    this.props.videoData.addEventListener('timeupdate', drawImageFromVideoToCanvas);
   }
 
-  recordVideo(e) {
+  setupStage(e) {
     const file = e.target.files[0];
     const videoElement = document.createElement('video');
     videoElement.muted = true;
@@ -101,57 +121,13 @@ class Canvas extends Component {
     });
   }
 
-  playSequence(fromFrame = 0, toFrame = this.props.videoData.length) {
-    this.setState({ shouldPlay: false });
-    const canvasCtx = this.getCanvasContext();
-    let currentFrame = fromFrame;
-    let timelineGrowthFactor = 100 / toFrame;
-
-    let imageToRender = (frame) => this.props.videoData[frame];
-    let makePlayButtonVisible = () => this.setState({ shouldPlay: true });
-    let updatePlayTrackWidth = (playTrackWidth) => this.setState({ playTrackWidth });
-    let startRAF = () => this.rafId = requestAnimationFrame(playVideo);
-    let cancelRAF = () => cancelAnimationFrame(this.rafId);
-
-    function playVideo() {
-      startRAF();
-
-      if (currentFrame == toFrame) {
-        cancelRAF();
-        makePlayButtonVisible();
-        return;
-      }
-
-      canvasCtx.putImageData(imageToRender(currentFrame), 0, 0);
-      currentFrame++;
-      updatePlayTrackWidth(Math.floor(currentFrame * timelineGrowthFactor));
-    }
-
-    startRAF();
-  }
-
-  stopAtFrame(frame) {
-    const playTrackWidth = Math.floor(frame * 100 / this.props.videoData.length);
-    this.getCanvasContext().putImageData(this.props.videoData[frame], 0, 0);
-    this.setState({ playTrackWidth });
-  }
-
-  pauseVideo() {
-    cancelAnimationFrame(this.rafId);
-    this.setState({ shouldPlay: true });
-  }
-
   render() {
     return (
       <section ref={el => this.parentElement = el} className="canvas">
         {this.state.videoProcessing && <Loader message="Processing video. Please wait..." />}
         {this.state.canvasVisible && <canvas ref={el => this.canvasElement = el} className="canvas_renderer"></canvas>}
-        {this.state.filePickerVisible && <FileInputField onFileSelected={this.recordVideo} message="Choose a video to start..."/>}
-        {this.state.canvasVisible && <TimeLine play={this.playSequence}
-          shouldPlay={this.state.shouldPlay}
-          pause={this.pauseVideo}
-          playTrackWidthInPercent={this.state.playTrackWidth}
-          stopAtFrame={this.stopAtFrame} />}
+        {this.state.filePickerVisible && <FileInputField onFileSelected={this.setupStage} message="Choose a video to start..."/>}
+        {this.state.canvasVisible && <TimeLine play={this.playVideo} pause={this.pauseVideo} paused={this.state.paused} />}
       </section>
     );
   }

@@ -15,10 +15,6 @@ function Timeline(props) {
     props.shouldPlay ? props.play(playFrom) : props.pause();
   }
 
-  function getButtonClassName() {
-    return props.shouldPlay ? 'timeline_button timeline_button--play' : 'timeline_button timeline_button--pause';
-  }
-
   function savetrackContainerRef(el) {
     trackContainerElement = el;
   }
@@ -52,12 +48,13 @@ function Timeline(props) {
   }
 
   function playViedeoFromFrame(e) {
-    props.shouldPlay ? stopAtSelectedFrameFrame(e) : playFromSelectedFrame(e);
+    // props.shouldPlay ? stopAtSelectedFrameFrame(e) : playFromSelectedFrame(e);
   }
 
   return (
     <div className="timeline">
-      <div className={getButtonClassName()} onClick={toggleVideo}></div>
+      {props.paused && <div className="timeline_button timeline_button--play" onClick={props.play}></div>}
+      {!props.paused && <div className="timeline_button timeline_button--pause" onClick={props.pause}></div>}
 
       <div ref={savetrackContainerRef} onClick={playViedeoFromFrame} className="timeline_track">
         <div className="timeline_trim-handle timeline_trim-handle--left"></div>
