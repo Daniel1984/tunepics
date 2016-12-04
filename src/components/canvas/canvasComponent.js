@@ -58,7 +58,7 @@ class Canvas extends Component {
     this.canvasElement.height = height;
   }
 
-  playVideo(frame = 10) {
+  playVideo() {
     this.setState({ paused: false });
     this.props.videoData.play();
 
@@ -67,7 +67,7 @@ class Canvas extends Component {
     cancelAnimationFrame(this.canvasRAFid);
 
     this.props.videoData.addEventListener('play', () => {
-      this.props.videoData.currentTime = 5;
+      // this.props.videoData.currentTime = frame;
       let drawToCanvas = () => {
         ctx.drawImage(this.props.videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
         ctx.font = '48px serif';

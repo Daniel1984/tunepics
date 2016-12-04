@@ -8,6 +8,7 @@ const TOOLBAR_WIDTH = 100;
 const TRACK_X_POS = TOOLBAR_WIDTH + TRIM_HANDLE_WIDTH + PLAY_BTN_WIDTH;
 
 let trackContainerElement;
+let trackElement;
 let playFrom = 0;
 
 function Timeline(props) {
@@ -17,6 +18,10 @@ function Timeline(props) {
 
   function savetrackContainerRef(el) {
     trackContainerElement = el;
+  }
+
+  function saveTrackRef(el) {
+    trackElement = el;
   }
 
   function getTotalTrackWidth() {
@@ -51,6 +56,11 @@ function Timeline(props) {
     // props.shouldPlay ? stopAtSelectedFrameFrame(e) : playFromSelectedFrame(e);
   }
 
+  props.videoData.addEventListener('timeupdate', function() {
+    if (!trackContainerElement || !trackElement) return;
+    trackElement.style.width = `${Math.ceil(getTotalTrackWidth() * props.videoData.currentTime / props.videoData.duration)}px`;;
+  });
+
   return (
     <div className="timeline">
       {props.paused && <div className="timeline_button timeline_button--play" onClick={props.play}></div>}
@@ -58,7 +68,7 @@ function Timeline(props) {
 
       <div ref={savetrackContainerRef} onClick={playViedeoFromFrame} className="timeline_track">
         <div className="timeline_trim-handle timeline_trim-handle--left"></div>
-        <div style={updateTrackWidth()} className="timeline_play-track"></div>
+        <div ref={saveTrackRef} className="timeline_play-track"></div>
         <div className="timeline_trim-handle timeline_trim-handle--right"></div>
       </div>
     </div>
