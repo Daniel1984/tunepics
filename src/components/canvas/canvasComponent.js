@@ -5,7 +5,18 @@ import * as setVideoSize from '../../actions/videoSizeActions';
 import Loader from '../common/loader/loaderComponent';
 import TimeLine from '../timeline/timelineComponent';
 import FileInputField from '../fileInputField/fileInputFieldComponent';
+import TollsList from '../toolsList/toolsListComponent';
 import './canvasStyles.scss';
+
+import CCapture from 'ccapture.js';
+
+const capturer = new CCapture({
+  framerate: 23,
+  verbose: false,
+  format: 'webm'
+});
+
+capturer.start();
 
 const LANDSCAPE_MAX_WIDTH = 640;
 const PORTRAIT_MAX_HEIGHT = 480;
@@ -17,14 +28,12 @@ class Canvas extends Component {
     this.playVideo = this.playVideo.bind(this);
     this.renderVideoFrame = this.renderVideoFrame.bind(this);
     this.setCanvasSize = this.setCanvasSize.bind(this);
-    this.pauseVideo = this.pauseVideo.bind(this);
 
     this.canvasRAFid;
 
     this.state = {
       canvasVisible: false,
-      filePickerVisible: true,
-      paused: true
+      filePickerVisible: true
     }
   }
 
@@ -61,17 +70,28 @@ class Canvas extends Component {
   }
 
   playVideo(frame = 0) {
-    this.props.videoData.currentTime = frame;
-    this.setState({ paused: false });
     this.props.videoData.play();
 
     const ctx = this.getCanvasContext();
     cancelAnimationFrame(this.canvasRAFid);
+    const oc = document.createElement('canvas');
+    oc.width = this.canvasElement.width;
+    oc.height = this.canvasElement.height;
+    const octx = oc.getContext('2d');
 
     let drawToCanvas = () => {
-      ctx.drawImage(this.props.videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
+      octx.clearRect(0, 0, oc.width, oc.height);
+      octx.drawImage(this.props.videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
+      octx.save();
+      octx.globalCompositeOperation = 'destination-in';
+      octx.beginPath();
+      octx.ellipse(310, 270, 35, 125, 1.55, 0, 10);
+      octx.fill();
+      ctx.drawImage(oc, 0, 0, this.canvasElement.width, this.canvasElement.height);
       ctx.font = '48px serif';
-      ctx.fillText('Mr.Retardo', this.canvasElement.width / 2, this.canvasElement.height / 2);
+      ctx.fillText('#AMAZE', 20, 40);
+      octx.restore();
+      capturer.capture(this.canvasElement);
     }
 
     let play = () => {
@@ -80,21 +100,15 @@ class Canvas extends Component {
 
       if (this.props.videoData.ended) {
         cancelAnimationFrame(this.canvasRAFid);
-        this.setState({ paused: true });
+        capturer.stop();
+        capturer.save();
       }
     }
 
     play();
   }
 
-  pauseVideo() {
-    this.setState({ paused: true });
-    this.props.videoData.pause();
-    cancelAnimationFrame(this.canvasRAFid);
-  }
-
   renderVideoFrame(frame = 0) {
-    this.props.videoData.currentTime = frame;
     this.props.videoData.play();
 
     let drawImageFromVideoToCanvas = () => {
@@ -110,6 +124,7 @@ class Canvas extends Component {
   setupStage(e) {
     const file = e.target.files[0];
     const videoElement = document.createElement('video');
+    window.haha = videoElement;
     videoElement.muted = true;
     videoElement.src = URL.createObjectURL(file);
     videoElement.addEventListener('loadedmetadata', () => {
@@ -122,12 +137,14 @@ class Canvas extends Component {
 
   render() {
     return (
-      <section ref={el => this.parentElement = el} className="canvas">
-        {this.state.videoProcessing && <Loader message="Processing video. Please wait..." />}
-        {this.state.canvasVisible && <canvas ref={el => this.canvasElement = el} className="canvas_renderer"></canvas>}
-        {this.state.filePickerVisible && <FileInputField onFileSelected={this.setupStage} message="Choose a video to start..."/>}
-        {this.state.canvasVisible && <TimeLine renderFrame={this.renderVideoFrame} play={this.playVideo} pause={this.pauseVideo} paused={this.state.paused} />}
-      </section>
+      <div>
+        <TollsList downloadVideo={this.playVideo} />
+        <section ref={el => this.parentElement = el} className="canvas">
+          {this.state.videoProcessing && <Loader message="Processing video. Please wait..." />}
+          {this.state.canvasVisible && <canvas ref={el => this.canvasElement = el} className="canvas_renderer"></canvas>}
+          {this.state.filePickerVisible && <FileInputField onFileSelected={this.setupStage} message="Choose a video to start..."/>}
+        </section>
+      </div>
     );
   }
 }
@@ -140,3 +157,4 @@ function mapStateToProps(state, ownProps) {
 }
 
 export default connect(mapStateToProps)(Canvas);
+//        {this.state.canvasVisible && <TimeLine renderFrame={this.renderVideoFrame} play={this.playVideo} pause={this.pauseVideo} paused={this.state.paused} />}
