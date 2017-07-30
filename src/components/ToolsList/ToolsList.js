@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux';
-import ToolsItem from '../toolsItem/toolsItemComponent';
-import './toolsListStyles.scss';
+import ToolsItem from '../ToolsItem/ToolsItem';
+import './ToolsList.scss';
 
 function ToolsList(props) {
   return (

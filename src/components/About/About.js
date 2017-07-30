@@ -1,6 +1,6 @@
 import React from 'react';
-import Header from './components/headerComponent'
-import './aboutStyles.scss';
+import Header from './components/Header'
+import './About.scss';
 
 function AboutComponent(props) {
   return (

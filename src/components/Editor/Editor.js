@@ -1,5 +1,5 @@
-import React, { PropTypes } from 'react';
-import Canvas from '../canvas/canvasComponent';
+import React from 'react';
+import Canvas from '../Canvas/Canvas';
 
 function Editor() {
   return (

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Route, IndexRoute } from 'react-router';
-import App from './components/app/appComponent';
-import About from './components/about/aboutComponent';
-import Editor from './components/editor/editorComponent';
+import App from './components/App/App';
+import About from './components/About/About';
+import Editor from './components/Editor/Editor';
 
 export default (
   <Route path="/" component={App}>

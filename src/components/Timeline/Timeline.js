@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import './timeline.scss';
+import './Timeline.scss';
 
 const TRIM_HANDLE_WIDTH = 10;
 const PLAY_BTN_WIDTH = 40;

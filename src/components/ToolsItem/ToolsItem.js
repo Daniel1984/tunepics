@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import * as toolsActions from '../../actions/toolsActions';
-import './toolsItemStyles.scss';
+import './ToolsItem.scss';
 
 function Tool(props) {
   function selectTool() {
