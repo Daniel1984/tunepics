@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
-import * as videoDataActions from '../../actions/videoDataActions';
-import * as setVideoSize from '../../actions/videoSizeActions';
+import doneConvertingVideo from '../../actions/videoDataActions';
+import setVideoSize from '../../actions/videoSizeActions';
 import Loader from '../common/Loader/Loader';
 import TimeLine from '../Timeline/Timeline';
 import FileInputField from '../FileInputField/FileInputField';
@@ -25,6 +25,8 @@ class Canvas extends Component {
   state = {
     canvasVisible: false,
     filePickerVisible: true,
+    width: 0,
+    height: 0,
   };
 
   getCanvasContext() {
@@ -58,16 +60,17 @@ class Canvas extends Component {
 
   setCanvasSize = () => {
     const { width, height } = this.getCanvasDimensions();
-    this.props.dispatch(setVideoSize.setVideoSize({ width, height }));
-    this.canvasElement.width = width;
-    this.canvasElement.height = height;
+    this.props.setVideoSize({ width, height });
+    this.setState({ width, height });
+    // this.canvasElement.width = width;
+    // this.canvasElement.height = height;
   }
 
   playVideo = (frame = 0) => {
-    console.log('playVideo')
     let canvasRAFid = undefined;
     const ctx = this.getCanvasContext();
     const { videoData } = this.props;
+    const { width, height } = this.state;
 
     videoData.play();
 
@@ -76,13 +79,16 @@ class Canvas extends Component {
     }
 
     const oc = document.createElement('canvas');
-    oc.width = this.canvasElement.width;
-    oc.height = this.canvasElement.height;
+    // oc.width = this.canvasElement.width;
+    // oc.height = this.canvasElement.height;
+    oc.width = width;
+    oc.height = height;
     const octx = oc.getContext('2d');
 
     let drawToCanvas = () => {
       octx.clearRect(0, 0, oc.width, oc.height);
-      octx.drawImage(videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
+      // octx.drawImage(videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
+      octx.drawImage(videoData, 0, 0, width, height);
       octx.save();
       octx.globalCompositeOperation = 'destination-in';
       octx.strokeStyle = "#df4b26";
@@ -97,7 +103,8 @@ class Canvas extends Component {
       // octx.fill();
 
 
-      ctx.drawImage(oc, 0, 0, this.canvasElement.width, this.canvasElement.height);
+      // ctx.drawImage(oc, 0, 0, this.canvasElement.width, this.canvasElement.height);
+      ctx.drawImage(oc, 0, 0, width, height);
       ctx.font = '48px serif';
       ctx.fillText('#AMAZE', 20, 40);
       octx.restore();
@@ -124,6 +131,7 @@ class Canvas extends Component {
 
   renderVideoFrame = (frame = 0) => {
     const { videoData } = this.props;
+    const { width, height } = this.state;
 
     videoData.play();
 
@@ -131,7 +139,8 @@ class Canvas extends Component {
       videoData.removeEventListener('timeupdate', drawImageFromVideoToCanvas);
       videoData.pause();
       const ctx = this.getCanvasContext();
-      ctx.drawImage(videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
+      // ctx.drawImage(videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
+      ctx.drawImage(videoData, 0, 0, width, height);
     }
 
     videoData.addEventListener('timeupdate', drawImageFromVideoToCanvas);
@@ -145,7 +154,7 @@ class Canvas extends Component {
     videoElement.src = URL.createObjectURL(file);
 
     videoElement.addEventListener('loadedmetadata', () => {
-      this.props.dispatch(videoDataActions.doneConvertingVideo(videoElement));
+      this.props.doneConvertingVideo(videoElement);
       this.setState({ canvasVisible: true, filePickerVisible: false });
       this.setCanvasSize();
       this.renderVideoFrame(0);
@@ -157,6 +166,8 @@ class Canvas extends Component {
       videoProcessing,
       canvasVisible,
       filePickerVisible,
+      width,
+      height,
     } = this.state;
 
     return (
@@ -168,7 +179,12 @@ class Canvas extends Component {
           )}
 
           {canvasVisible && (
-            <canvas ref={el => this.canvasElement = el} className="canvas_renderer" />
+            <canvas
+              ref={el => this.canvasElement = el}
+              className="canvas_renderer"
+              width={width}
+              height={height}
+            />
           )}
 
           {filePickerVisible && (
@@ -180,8 +196,12 @@ class Canvas extends Component {
   }
 }
 
-function mapStateToProps({ videoData }) {
-  return { videoData };
+function mapStateToProps(state) {
+  console.log('rest = ', state);
+  return { videoData: state.videoData };
 }
 
-export default connect(mapStateToProps)(Canvas);
+export default connect(
+  mapStateToProps,
+  { setVideoSize, doneConvertingVideo }
+)(Canvas);

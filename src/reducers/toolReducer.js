@@ -1,7 +1,7 @@
 export default function toolReducer(state = {}, action) {
   switch (action.type) {
     case 'SELECT_TOOL':
-      return Object.assign({}, action.tool);
+      return action.tool;
       break;
 
     default:

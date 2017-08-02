@@ -72,10 +72,8 @@ function Timeline(props) {
   );
 }
 
-function mapStateToProps(state, ownProps) {
-  return {
-    videoData: state.videoData
-  }
+function mapStateToProps({ videoData }) {
+  return { videoData };
 }
 
 export default connect(mapStateToProps)(Timeline);
