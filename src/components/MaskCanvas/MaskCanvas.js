@@ -2,34 +2,50 @@ import React, { Component } from 'react'
 import './MaskCanvas.scss';
 
 const SIDEBAR_WIDTH = 100;
+const clickX = [];
+const clickY = [];
+const clickDrag = [];
 
 class MaskCanvas extends Component {
-  state = {
-    addingMask: false
-  };
+  state = { addingMask: false };
+
+  registerCoordinate = (pageX, pageY, dragging) => {
+    const { offsetLeft, offsetTop } = this.state;
+    clickX.push(pageX - offsetLeft);
+    clickY.push(pageY - offsetTop);
+    clickDrag.push(dragging);
+  }
 
   registerStartCoordinates = (e) => {
-    this.setState({
-      addingMask: true,
-      startX: e.pageX,
-      startY: e.pageY,
-    });
+    this.setState({ addingMask: true });
+    this.registerCoordinate(e.pageX, e.pageY);
+    this.drawMask();
   }
 
   registerMoveCoordinates = (e) => {
     if (this.state.addingMask) {
-      const { width, height } = this.props;
-      const { offsetLeft, offsetTop, startX, startY } = this.state;
-      const xPos = e.pageX - offsetLeft;
-      const yPos = e.pageY - offsetTop;
+      this.registerCoordinate(e.pageX, e.pageY, true);
+      this.drawMask();
+    }
+  }
 
-      // this.ctx.clearRect(0, 0, width, height);
-      this.ctx.strokeStyle = "#df4b26";
-      this.ctx.lineJoin = "round";
-      this.ctx.lineWidth = 5;
+  drawMask = () => {
+    // const { width, height } = this.props;
+    // this.ctx.clearRect(0, 0, width, height);
+    this.ctx.strokeStyle = 'rgb(150, 34, 111)';
+    this.ctx.lineJoin = 'round';
+    this.ctx.lineWidth = 20;
+
+    for (let i = 0; i < clickX.length; i += 1) {
       this.ctx.beginPath();
-      this.ctx.moveTo(startX, startY);
-      this.ctx.lineTo(xPos, yPos);
+
+      if (clickDrag[i]) {
+        this.ctx.moveTo(clickX[i - 1], clickY[i - 1]);
+      } else {
+        this.ctx.moveTo(clickX[i] - 1, clickY[i]);
+      }
+
+      this.ctx.lineTo(clickX[i], clickY[i]);
       this.ctx.closePath();
       this.ctx.stroke();
     }
