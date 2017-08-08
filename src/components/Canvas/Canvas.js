@@ -6,6 +6,7 @@ import Loader from '../common/Loader/Loader';
 import TimeLine from '../Timeline/Timeline';
 import FileInputField from '../FileInputField/FileInputField';
 import TollsList from '../ToolsList/ToolsList';
+import MaskCanvas from '../MaskCanvas/MaskCanvas';
 import './Canvas.scss';
 
 import CCapture from 'ccapture.js';
@@ -62,8 +63,6 @@ class Canvas extends Component {
     const { width, height } = this.getCanvasDimensions();
     this.props.setVideoSize({ width, height });
     this.setState({ width, height });
-    // this.canvasElement.width = width;
-    // this.canvasElement.height = height;
   }
 
   playVideo = (frame = 0) => {
@@ -79,15 +78,12 @@ class Canvas extends Component {
     }
 
     const oc = document.createElement('canvas');
-    // oc.width = this.canvasElement.width;
-    // oc.height = this.canvasElement.height;
     oc.width = width;
     oc.height = height;
     const octx = oc.getContext('2d');
 
     let drawToCanvas = () => {
       octx.clearRect(0, 0, oc.width, oc.height);
-      // octx.drawImage(videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
       octx.drawImage(videoData, 0, 0, width, height);
       octx.save();
       octx.globalCompositeOperation = 'destination-in';
@@ -139,7 +135,6 @@ class Canvas extends Component {
       videoData.removeEventListener('timeupdate', drawImageFromVideoToCanvas);
       videoData.pause();
       const ctx = this.getCanvasContext();
-      // ctx.drawImage(videoData, 0, 0, this.canvasElement.width, this.canvasElement.height);
       ctx.drawImage(videoData, 0, 0, width, height);
     }
 
@@ -173,6 +168,7 @@ class Canvas extends Component {
     return (
       <div>
         <TollsList downloadVideo={this.playVideo} />
+
         <section className="canvas">
           {videoProcessing && (
             <Loader message="Processing video. Please wait..." />
@@ -180,11 +176,15 @@ class Canvas extends Component {
 
           {canvasVisible && (
             <canvas
-              ref={el => this.canvasElement = el}
               className="canvas_renderer"
+              ref={el => this.canvasElement = el}
               width={width}
               height={height}
             />
+          )}
+
+          {(this.props.tool === 'addMask') && (
+            <MaskCanvas width={width} height={height} />
           )}
 
           {filePickerVisible && (
@@ -196,9 +196,8 @@ class Canvas extends Component {
   }
 }
 
-function mapStateToProps(state) {
-  console.log('rest = ', state);
-  return { videoData: state.videoData };
+function mapStateToProps({ tool, videoData }) {
+  return { videoData, tool };
 }
 
 export default connect(

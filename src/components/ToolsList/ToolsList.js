@@ -1,7 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import selectTool from '../../actions/toolsActions';
-import ToolsItem from '../ToolsItem/ToolsItem';
 import './ToolsList.scss';
 
 function ToolsList({ videoData, downloadVideo, selectTool }) {
