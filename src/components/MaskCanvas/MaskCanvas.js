@@ -2,12 +2,34 @@ import React, { Component } from 'react'
 import './MaskCanvas.scss';
 
 const SIDEBAR_WIDTH = 100;
+const POINTER_DEFAULT_SIZE = 20;
 const clickX = [];
 const clickY = [];
 const clickDrag = [];
 
 class MaskCanvas extends Component {
   state = { addingMask: false };
+
+  componentDidMount() {
+    this.putPaskOverlay();
+  }
+
+  putPaskOverlay() {
+    const { width, height } = this.props;
+
+    this.ctx.fillStyle = 'rgba(150, 34, 111, 0.4)';
+    this.ctx.rect(0, 0, width, height);
+    this.ctx.fill();
+  }
+
+  moveMaskPointer(e) {
+    const halfPointerSize = POINTER_DEFAULT_SIZE / 2;
+    const y = e.pageY - halfPointerSize;
+    const x = e.pageX - SIDEBAR_WIDTH - halfPointerSize;
+
+    this.maskPointer.style.top = `${y}px`;
+    this.maskPointer.style.left = `${x}px`;
+  }
 
   registerCoordinate = (pageX, pageY, dragging) => {
     const { offsetLeft, offsetTop } = this.state;
@@ -27,11 +49,12 @@ class MaskCanvas extends Component {
       this.registerCoordinate(e.pageX, e.pageY, true);
       this.drawMask();
     }
+
+    this.moveMaskPointer(e);
   }
 
   drawMask = () => {
-    // const { width, height } = this.props;
-    // this.ctx.clearRect(0, 0, width, height);
+    this.ctx.globalCompositeOperation = 'destination-out';
     this.ctx.strokeStyle = 'rgb(150, 34, 111)';
     this.ctx.lineJoin = 'round';
     this.ctx.lineWidth = 20;
@@ -65,20 +88,33 @@ class MaskCanvas extends Component {
     });
   }
 
+  setPointerRef = (el) => {
+    this.maskPointer = el;
+  }
+
   render() {
     const { width, height } = this.props;
 
     return (
-      <canvas
-        className="mask-canvas"
-        ref={this.saveElementRef}
+      <div
+        className="root"
+        style={{
+          width: `${width}px`,
+          height: `${height}px`,
+        }}
         onMouseDown={this.registerStartCoordinates}
         onMouseMove={this.registerMoveCoordinates}
         onMouseUp={this.registerFinishCoordinates}
-        width={width}
-        height={height}
-      />
-    )
+      >
+        <canvas
+          className="mask-canvas"
+          ref={this.saveElementRef}
+          width={width}
+          height={height}
+        />
+        <div ref={this.setPointerRef} className="mask-canvas_pointer" />
+      </div>
+    );
   }
 }
 

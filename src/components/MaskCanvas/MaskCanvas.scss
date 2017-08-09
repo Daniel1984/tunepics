@@ -1,5 +1,25 @@
+.root {
+  cursor: none;
+
+  &:hover {
+    .mask-canvas_pointer {
+      display: block;
+    }
+  }
+}
+
 .mask-canvas {
   position: absolute;
   z-index: 10;
-  // background-color: rgba(22, 123, 54, 0.5);
+}
+
+.mask-canvas_pointer {
+  width: 20px;
+  height: 20px;
+  border: 1px solid white;
+  border-radius: 50%;
+  position: absolute;
+  z-index: 100;
+  display: none;
+  transform: translateZ(0);
 }
