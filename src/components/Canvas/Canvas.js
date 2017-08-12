@@ -1,18 +1,18 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
-import doneConvertingVideo from '../../actions/videoDataActions';
-import setVideoSize from '../../actions/videoSizeActions';
+import { doneConvertingVideo, setVideoSize } from '../../actions';
 import Loader from '../common/Loader/Loader';
 import TimeLine from '../Timeline/Timeline';
 import FileInputField from '../FileInputField/FileInputField';
 import TollsList from '../ToolsList/ToolsList';
 import MaskCanvas from '../MaskCanvas/MaskCanvas';
+import { drawPencilMask } from '../../utils';
 import './Canvas.scss';
 
 import CCapture from 'ccapture.js';
 
 const capturer = new CCapture({
-  framerate: 23,
+  framerate: 24,
   verbose: false,
   format: 'webm'
 });
@@ -68,7 +68,7 @@ class Canvas extends Component {
   playVideo = (frame = 0) => {
     let canvasRAFid = undefined;
     const ctx = this.getCanvasContext();
-    const { videoData } = this.props;
+    const { videoData, maskCoordinates: { clickX, clickY, dragging } } = this.props;
     const { width, height } = this.state;
 
     videoData.play();
@@ -83,26 +83,14 @@ class Canvas extends Component {
     const octx = oc.getContext('2d');
 
     let drawToCanvas = () => {
-      octx.clearRect(0, 0, oc.width, oc.height);
+      // octx.clearRect(0, 0, width, height);
       octx.drawImage(videoData, 0, 0, width, height);
       octx.save();
       octx.globalCompositeOperation = 'destination-in';
-      octx.strokeStyle = "#df4b26";
-      octx.lineJoin = "round";
-      octx.lineWidth = 20;
-      octx.moveTo(50, 50);
-      octx.lineTo(300, 200);
-      octx.closePath();
-      octx.stroke();
-      // octx.beginPath();
-      // octx.ellipse(310, 270, 35, 125, 1.55, 0, 10);
-      // octx.fill();
 
+      drawPencilMask({ ctx: octx, lineWidth: 30, clickX, clickY, dragging });
 
-      // ctx.drawImage(oc, 0, 0, this.canvasElement.width, this.canvasElement.height);
       ctx.drawImage(oc, 0, 0, width, height);
-      ctx.font = '48px serif';
-      ctx.fillText('#AMAZE', 20, 40);
       octx.restore();
       capturer.capture(this.canvasElement);
     }
@@ -196,8 +184,8 @@ class Canvas extends Component {
   }
 }
 
-function mapStateToProps({ tool, videoData }) {
-  return { videoData, tool };
+function mapStateToProps({ tool, videoData, maskCoordinates }) {
+  return { videoData, tool, maskCoordinates };
 }
 
 export default connect(

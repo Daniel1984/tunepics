@@ -6,7 +6,7 @@ import Editor from './components/Editor/Editor';
 
 export default (
   <Route path="/" component={App}>
-    <IndexRoute component={About} />
+    <IndexRoute component={Editor} />
     <Route path="editor" component={Editor} />
   </Route>
 );

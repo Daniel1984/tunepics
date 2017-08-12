@@ -1,11 +1,14 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux';
+import { saveMaskDrawing } from '../../actions';
+import { drawPencilMask } from '../../utils';
 import './MaskCanvas.scss';
 
 const SIDEBAR_WIDTH = 100;
-const POINTER_DEFAULT_SIZE = 20;
+const POINTER_DEFAULT_SIZE = 30;
 const clickX = [];
 const clickY = [];
-const clickDrag = [];
+const dragging = [];
 
 class MaskCanvas extends Component {
   state = { addingMask: false };
@@ -31,11 +34,11 @@ class MaskCanvas extends Component {
     this.maskPointer.style.left = `${x}px`;
   }
 
-  registerCoordinate = (pageX, pageY, dragging) => {
+  registerCoordinate = (pageX, pageY, isDragging) => {
     const { offsetLeft, offsetTop } = this.state;
     clickX.push(pageX - offsetLeft);
     clickY.push(pageY - offsetTop);
-    clickDrag.push(dragging);
+    dragging.push(isDragging);
   }
 
   registerStartCoordinates = (e) => {
@@ -55,27 +58,16 @@ class MaskCanvas extends Component {
 
   drawMask = () => {
     this.ctx.globalCompositeOperation = 'destination-out';
-    this.ctx.strokeStyle = 'rgb(150, 34, 111)';
-    this.ctx.lineJoin = 'round';
-    this.ctx.lineWidth = 20;
-
-    for (let i = 0; i < clickX.length; i += 1) {
-      this.ctx.beginPath();
-
-      if (clickDrag[i]) {
-        this.ctx.moveTo(clickX[i - 1], clickY[i - 1]);
-      } else {
-        this.ctx.moveTo(clickX[i] - 1, clickY[i]);
-      }
-
-      this.ctx.lineTo(clickX[i], clickY[i]);
-      this.ctx.closePath();
-      this.ctx.stroke();
-    }
+    drawPencilMask({ ctx: this.ctx, lineWidth: POINTER_DEFAULT_SIZE, clickX, clickY, dragging });
   }
 
   registerFinishCoordinates = (e) => {
     this.setState({ addingMask: false });
+    this.props.saveMaskDrawing({
+      clickX,
+      clickY,
+      dragging,
+    });
   }
 
   saveElementRef = (el) => {
@@ -112,10 +104,18 @@ class MaskCanvas extends Component {
           width={width}
           height={height}
         />
-        <div ref={this.setPointerRef} className="mask-canvas_pointer" />
+
+        <div
+          style={{
+            width: `${POINTER_DEFAULT_SIZE}px`,
+            height: `${POINTER_DEFAULT_SIZE}px`,
+          }}
+          ref={this.setPointerRef}
+          className="mask-canvas_pointer"
+        />
       </div>
     );
   }
 }
 
-export default MaskCanvas;
+export default connect(null, { saveMaskDrawing })(MaskCanvas);
